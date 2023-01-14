@@ -18,7 +18,6 @@ import me.synnk.jbytecustom.utils.attach.RuntimeJarArchive;
 import me.synnk.jbytecustom.utils.gui.LookUtils;
 import me.synnk.jbytecustom.utils.task.*;
 import org.apache.commons.cli.*;
-import org.jfree.chart.util.ArrayUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -65,7 +64,6 @@ public class JByteCustom extends JFrame {
         }
     }
 
-    private JPanel contentPane;
     private final ClassTree jarTree;
     private MyCodeList clist;
     private final PageEndPanel pp;
@@ -76,7 +74,6 @@ public class JByteCustom extends JFrame {
     private InfoPanel sp;
     private LVPList lvplist;
     private ControlFlowPanel cfp;
-    private final MyMenuBar myMenuBar;
     private ClassNode currentNode;
     private MethodNode currentMethod;
     private File filePath;
@@ -111,9 +108,10 @@ public class JByteCustom extends JFrame {
         this.setLocationRelativeTo(null);
 
         this.setTitle(jbytemod);
-        this.setJMenuBar(myMenuBar = new MyMenuBar(this, agent));
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(TreeCellRenderer.class.getResource("/resources/jbytemod.png")));
+        this.setJMenuBar(new MyMenuBar(this, agent));
         this.jarTree = new ClassTree(this);
-        contentPane = new JPanel();
+        JPanel contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(5, 5));
         this.setContentPane(contentPane);
@@ -206,30 +204,27 @@ public class JByteCustom extends JFrame {
             configPath = line.getOptionValue("c");
         }
         initialize();
-        EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                try {
-                    if (!lafInit) {
-                        LookUtils.setLAF();
-                        lafInit = true;
-                    }
-                    JByteCustom frame = new JByteCustom(false);
-
-                    instance = frame;
-                    frame.setVisible(true);
-                    if (line.hasOption("f")) {
-                        File input = new File(line.getOptionValue("f"));
-                        if (FileUtils.exists(input) && FileUtils.isType(input, ".jar", ".class")) {
-                            frame.loadFile(input);
-                            JByteCustom.LOGGER.log("Specified file loaded");
-                        } else {
-                            JByteCustom.LOGGER.err("Specified file not found");
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        EventQueue.invokeLater( () -> {
+            try {
+                if (!lafInit) {
+                    LookUtils.setLAF();
+                    lafInit = true;
                 }
+                JByteCustom frame = new JByteCustom(false);
+
+                instance = frame;
+                frame.setVisible(true);
+                if (line.hasOption("f")) {
+                    File input = new File(line.getOptionValue("f"));
+                    if (FileUtils.exists(input) && FileUtils.isType(input, ".jar", ".class")) {
+                        frame.loadFile(input);
+                        JByteCustom.LOGGER.log("Specified file loaded");
+                    } else {
+                        JByteCustom.LOGGER.err("Specified file not found");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -252,12 +247,8 @@ public class JByteCustom extends JFrame {
         new RetransformTask(this, agentInstrumentation, file).execute();
     }
 
-    public void attachTo(VirtualMachine vm) throws Exception {
+    public void attachTo(VirtualMachine vm) {
         new AttachTask(this, vm).execute();
-    }
-
-    public void changeUI(String clazz) {
-        LookUtils.changeLAF(clazz);
     }
 
     public ControlFlowPanel getCFP() {
@@ -302,10 +293,6 @@ public class JByteCustom extends JFrame {
 
     private void setLVPList(LVPList lvp) {
         this.lvplist = lvp;
-    }
-
-    public MyMenuBar getMyMenuBar() {
-        return myMenuBar;
     }
 
     public PageEndPanel getPP() {
@@ -496,7 +483,7 @@ public class JByteCustom extends JFrame {
         super.setVisible(b);
     }
 
-    public void treeSelection(ClassNode cn, MethodNode mn) {
+    public void treeSelection(MethodNode mn) {
         //selection may take some time
         new Thread(() -> {
             DefaultTreeModel tm = (DefaultTreeModel) jarTree.getModel();

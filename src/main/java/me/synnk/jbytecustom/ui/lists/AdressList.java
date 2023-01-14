@@ -8,12 +8,12 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AdressList extends JList<String> {
-    private MyCodeList cl;
+    private final MyCodeList cl;
 
     public AdressList(MyCodeList cl) {
-        super(new DefaultListModel<String>());
+        super(new DefaultListModel<>());
         this.cl = cl;
-        cl.setAdressList(this);
+        cl.setAddressList(this);
         this.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         this.updateAdr();
         this.setSelectionModel(new DefaultListSelectionModel() {
@@ -29,7 +29,7 @@ public class AdressList extends JList<String> {
 
 
     public void updateAdr() {
-        LazyListModel<String> lm = new LazyListModel<String>();
+        LazyListModel<String> lm = new LazyListModel<>();
         LazyListModel<InstrEntry> clm = (LazyListModel<InstrEntry>) cl.getModel();
         if (clm.getSize() > 9999) {
             throw new RuntimeException("code too big");

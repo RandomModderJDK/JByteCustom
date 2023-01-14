@@ -12,18 +12,16 @@ import org.objectweb.asm.tree.MethodNode;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.regex.Pattern;
 
 public class SearchList extends JList<SearchEntry> {
 
-    private JByteCustom jbm;
+    private final JByteCustom jbm;
 
     public SearchList(JByteCustom jbm) {
-        super(new LazyListModel<SearchEntry>());
+        super(new LazyListModel<>());
         this.jbm = jbm;
         this.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         this.addMouseListener(new MouseAdapter() {
@@ -31,29 +29,22 @@ public class SearchList extends JList<SearchEntry> {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     JPopupMenu menu = new JPopupMenu();
                     JMenuItem decl = new JMenuItem(JByteCustom.res.getResource("go_to_dec"));
-                    decl.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            ClassNode cn = SearchList.this.getSelectedValue().getCn();
-                            MethodNode mn = SearchList.this.getSelectedValue().getMn();
-                            jbm.selectMethod(cn, mn);
-                        }
+                    decl.addActionListener(e1 -> {
+                        ClassNode cn = SearchList.this.getSelectedValue().getCn();
+                        MethodNode mn = SearchList.this.getSelectedValue().getMn();
+                        jbm.selectMethod(cn, mn);
                     });
                     menu.add(decl);
                     JMenuItem treeEntry = new JMenuItem(JByteCustom.res.getResource("select_tree"));
-                    treeEntry.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            ClassNode cn = SearchList.this.getSelectedValue().getCn();
-                            MethodNode mn = SearchList.this.getSelectedValue().getMn();
-                            jbm.treeSelection(cn, mn);
-                        }
+                    treeEntry.addActionListener(e12 -> {
+                        MethodNode mn = SearchList.this.getSelectedValue().getMn();
+                        jbm.treeSelection(mn);
                     });
                     menu.add(treeEntry);
                     JMenuItem copy = new JMenuItem(JByteCustom.res.getResource("copy_text"));
-                    copy.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            StringSelection selection = new StringSelection(SearchList.this.getSelectedValue().getFound());
-                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
-                        }
+                    copy.addActionListener(e13 -> {
+                        StringSelection selection = new StringSelection(SearchList.this.getSelectedValue().getFound());
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
                     });
                     menu.add(copy);
                     menu.show(SearchList.this, e.getX(), e.getY());
